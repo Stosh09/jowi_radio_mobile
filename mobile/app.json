@@ -1,0 +1,91 @@
+{
+  "expo": {
+    "name": "JOWI 98.1 FM",
+    "slug": "jowi-radio",
+    "scheme": "jowi",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0a0c0e",
+    "primaryColor": "#e8a317",
+    "description": "Listen live to JOWI 98.1 FM — jamuomo. Schedule, presenters, shoutouts, song requests and live polls.",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "fm.jowi981.radio"
+    },
+    "android": {
+      "package": "fm.jowi981.radio",
+      "adaptiveIcon": {
+        "backgroundColor": "#0a0c0e",
+        "foregroundImage": "./assets/android-icon-foreground.png"
+      },
+      "permissions": [
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-status-bar",
+      [
+        "expo-audio",
+        {
+          "enableBackgroundPlayback": true,
+          "enableBackgroundRecording": false,
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 240,
+          "resizeMode": "contain",
+          "backgroundColor": "#2A1404"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#e8a317",
+          "defaultChannel": "broadcasts"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow JOWI to attach photos of news notices to booth bulletins.",
+          "cameraPermission": "Allow JOWI to photograph news notices for booth bulletins.",
+          "microphonePermission": false
+        }
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-web-browser",
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4544aa50-06bc-4dea-be79-23211d8e6783"
+      }
+    },
+    "owner": "stosh.w"
+  }
+}
