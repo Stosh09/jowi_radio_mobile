@@ -1,0 +1,401 @@
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
+import {
+  estimateReadTime,
+  isAllowedNewsAttachment,
+  NEWS_ATTACHMENT_BUCKET,
+  PRESENTER_NEWS,
+  sortNewsForAir,
+  type NewsCategory,
+  type NewsItem,
+  type NewsStatus,
+} from '../config/news'
+import { isSupabaseConfigured, supabase } from '../lib/supabase'
+
+export interface NewsDraftInput {
+  headline: string
+  summary: string
+  body: string
+  category: NewsCategory
+  status: NewsStatus
+  priority?: number
+  startsAt?: string | null
+  endsAt?: string | null
+  /** New file to upload (optional) */
+  file?: File | null
+  /** Remove existing attachment without replacing */
+  clearAttachment?: boolean
+}
+
+interface NewsBulletinApi {
+  live: NewsItem[]
+  drafts: NewsItem[]
+  backendReady: boolean
+  usingFallback: boolean
+  loading: boolean
+  createBulletin: (input: NewsDraftInput) => Promise<{ ok: boolean; error?: string }>
+  updateBulletin: (
+    id: string,
+    input: Partial<NewsDraftInput>,
+  ) => Promise<{ ok: boolean; error?: string }>
+  setStatus: (id: string, status: NewsStatus) => Promise<{ ok: boolean; error?: string }>
+  openAttachment: (item: NewsItem) => Promise<boolean>
+  refresh: () => Promise<void>
+}
+
+interface NewsRow {
+  id: string
+  headline: string
+  summary: string
+  body: string
+  category: NewsCategory
+  status: NewsStatus
+  priority: number
+  starts_at: string | null
+  ends_at: string | null
+  attachment_path: string | null
+  attachment_name: string | null
+  attachment_mime: string | null
+  updated_at: string
+}
+
+const NewsBulletinContext = createContext<NewsBulletinApi | null>(null)
+const SELECT_COLS =
+  'id, headline, summary, body, category, status, priority, starts_at, ends_at, attachment_path, attachment_name, attachment_mime, updated_at'
+
+function mapRow(row: NewsRow): NewsItem {
+  return {
+    id: row.id,
+    headline: row.headline,
+    summary: row.summary,
+    body: row.body,
+    category: row.category,
+    status: row.status,
+    priority: row.priority,
+    startsAt: row.starts_at,
+    endsAt: row.ends_at,
+    attachmentPath: row.attachment_path,
+    attachmentName: row.attachment_name,
+    attachmentMime: row.attachment_mime,
+    updatedAt: row.updated_at,
+    readTime: estimateReadTime(row.body),
+  }
+}
+
+function inWindow(item: NewsItem, now = Date.now()): boolean {
+  if (item.startsAt) {
+    const start = Date.parse(item.startsAt)
+    if (!Number.isNaN(start) && now < start) return false
+  }
+  if (item.endsAt) {
+    const end = Date.parse(item.endsAt)
+    if (!Number.isNaN(end) && now > end) return false
+  }
+  return true
+}
+
+function fallbackLive(): NewsItem[] {
+  return sortNewsForAir(PRESENTER_NEWS.filter((n) => (n.status ?? 'live') === 'live'))
+}
+
+function safeFileName(name: string): string {
+  return name.replace(/[^\w.\-()+ ]+/g, '_').slice(0, 120)
+}
+
+async function removeStoragePath(path: string | null | undefined) {
+  if (!supabase || !path) return
+  const { error } = await supabase.storage.from(NEWS_ATTACHMENT_BUCKET).remove([path])
+  if (error) console.error('Attachment remove failed', error.message)
+}
+
+async function uploadAttachment(bulletinId: string, file: File, previousPath?: string | null) {
+  if (!supabase) return { ok: false as const, message: 'Supabase not configured' }
+
+  const check = isAllowedNewsAttachment(file)
+  if (check) return { ok: false as const, message: check }
+
+  const path = `${bulletinId}/${Date.now()}-${safeFileName(file.name)}`
+  const { error: upErr } = await supabase.storage.from(NEWS_ATTACHMENT_BUCKET).upload(path, file, {
+    cacheControl: '3600',
+    upsert: false,
+    contentType: file.type || undefined,
+  })
+  if (upErr) {
+    console.error('Attachment upload failed', upErr.message)
+    const missingBucket =
+      /bucket|not found|NoSuchBucket/i.test(upErr.message) || upErr.message.includes('404')
+    const rls = /row-level security|policy|not authorized|403/i.test(upErr.message)
+    return {
+      ok: false as const,
+      message: missingBucket
+        ? 'Storage bucket booth-news is missing. Run supabase/news_attachments.sql then supabase/news_anon_storage.sql.'
+        : rls
+          ? 'Storage upload blocked. Run supabase/news_anon_storage.sql in the SQL Editor.'
+          : `Upload failed: ${upErr.message}`,
+    }
+  }
+
+  const { error: dbErr } = await supabase
+    .from('news_bulletins')
+    .update({
+      attachment_path: path,
+      attachment_name: file.name,
+      attachment_mime: file.type || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', bulletinId)
+
+  if (dbErr) {
+    await removeStoragePath(path)
+    console.error('Attachment metadata failed', dbErr.message)
+    return {
+      ok: false as const,
+      message: /attachment_/i.test(dbErr.message)
+        ? 'Attachment columns missing. Run supabase/news_attachments.sql in the SQL Editor.'
+        : `Could not save attachment info: ${dbErr.message}`,
+    }
+  }
+
+  if (previousPath && previousPath !== path) {
+    await removeStoragePath(previousPath)
+  }
+
+  return { ok: true as const }
+}
+
+export function NewsBulletinProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<NewsItem[]>([])
+  const [loading, setLoading] = useState(false)
+  const [usingFallback, setUsingFallback] = useState(!isSupabaseConfigured)
+  const backendReady = isSupabaseConfigured && Boolean(supabase)
+
+  const refresh = useCallback(async () => {
+    if (!supabase) {
+      setItems(fallbackLive())
+      setUsingFallback(true)
+      return
+    }
+
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('news_bulletins')
+      .select(SELECT_COLS)
+      .in('status', ['live', 'draft'])
+      .order('updated_at', { ascending: false })
+
+    setLoading(false)
+
+    if (error) {
+      console.error('Failed to load news bulletins', error.message)
+      setItems(fallbackLive())
+      setUsingFallback(true)
+      return
+    }
+
+    setUsingFallback(false)
+    setItems((data as NewsRow[]).map(mapRow))
+  }, [])
+
+  useEffect(() => {
+    void refresh()
+    if (!supabase) return
+
+    const client = supabase
+
+    const { data: authSub } = client.auth.onAuthStateChange(() => {
+      void refresh()
+    })
+
+    const channel = client
+      .channel('jowi-news')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'news_bulletins' },
+        () => {
+          void refresh()
+        },
+      )
+      .subscribe()
+
+    return () => {
+      authSub.subscription.unsubscribe()
+      void client.removeChannel(channel)
+    }
+  }, [refresh])
+
+  const live = useMemo(
+    () => sortNewsForAir(items.filter((n) => n.status === 'live' && inWindow(n))),
+    [items],
+  )
+
+  const drafts = useMemo(
+    () =>
+      sortNewsForAir(
+        items.filter((n) => n.status === 'draft' || (n.status === 'live' && !inWindow(n))),
+      ),
+    [items],
+  )
+
+  const createBulletin = useCallback(
+    async (input: NewsDraftInput) => {
+      if (!supabase) return { ok: false, error: 'Supabase is not configured.' }
+
+      const { data, error } = await supabase
+        .from('news_bulletins')
+        .insert({
+          headline: input.headline.trim(),
+          summary: input.summary.trim(),
+          body: input.body.trim(),
+          category: input.category,
+          status: input.status,
+          priority: input.priority ?? (input.category === 'Breaking' ? 10 : 0),
+          starts_at: input.startsAt || null,
+          ends_at: input.endsAt || null,
+        })
+        .select('id')
+        .single()
+
+      if (error || !data?.id) {
+        console.error('Create bulletin failed', error?.message)
+        return {
+          ok: false,
+          error: error?.message?.includes('row-level security')
+            ? 'Save blocked by RLS. Run supabase/news_anon_write.sql in the SQL Editor, then try again.'
+            : error?.message || 'Create failed.',
+        }
+      }
+
+      if (input.file) {
+        const up = await uploadAttachment(data.id as string, input.file)
+        if (!up.ok) {
+          await refresh()
+          return { ok: false, error: up.message }
+        }
+      }
+
+      await refresh()
+      return { ok: true }
+    },
+    [refresh],
+  )
+
+  const updateBulletin = useCallback(
+    async (id: string, input: Partial<NewsDraftInput>) => {
+      if (!supabase) return { ok: false, error: 'Supabase is not configured.' }
+
+      const existing = items.find((n) => n.id === id)
+
+      const patch: Record<string, unknown> = { updated_at: new Date().toISOString() }
+      if (input.headline != null) patch.headline = input.headline.trim()
+      if (input.summary != null) patch.summary = input.summary.trim()
+      if (input.body != null) patch.body = input.body.trim()
+      if (input.category != null) {
+        patch.category = input.category
+        if (input.priority == null && input.category === 'Breaking') patch.priority = 10
+      }
+      if (input.status != null) patch.status = input.status
+      if (input.priority != null) patch.priority = input.priority
+      if (input.startsAt !== undefined) patch.starts_at = input.startsAt || null
+      if (input.endsAt !== undefined) patch.ends_at = input.endsAt || null
+
+      if (input.clearAttachment && !input.file) {
+        patch.attachment_path = null
+        patch.attachment_name = null
+        patch.attachment_mime = null
+      }
+
+      const { error } = await supabase.from('news_bulletins').update(patch).eq('id', id)
+      if (error) {
+        console.error('Update bulletin failed', error.message)
+        return {
+          ok: false,
+          error: error.message.includes('row-level security')
+            ? 'Update blocked by RLS. Run supabase/news_anon_write.sql in the SQL Editor.'
+            : error.message,
+        }
+      }
+
+      if (input.clearAttachment && !input.file) {
+        await removeStoragePath(existing?.attachmentPath)
+      }
+
+      if (input.file) {
+        const up = await uploadAttachment(id, input.file, existing?.attachmentPath)
+        if (!up.ok) {
+          await refresh()
+          return { ok: false, error: up.message }
+        }
+      }
+
+      await refresh()
+      return { ok: true }
+    },
+    [items, refresh],
+  )
+
+  const setStatus = useCallback(
+    async (id: string, status: NewsStatus) => {
+      return updateBulletin(id, { status })
+    },
+    [updateBulletin],
+  )
+
+  const openAttachment = useCallback(async (item: NewsItem) => {
+    if (!supabase || !item.attachmentPath) return false
+    const { data, error } = await supabase.storage
+      .from(NEWS_ATTACHMENT_BUCKET)
+      .createSignedUrl(item.attachmentPath, 60 * 60)
+    if (error || !data?.signedUrl) {
+      console.error('Signed URL failed', error?.message)
+      return false
+    }
+    window.open(data.signedUrl, '_blank', 'noopener,noreferrer')
+    return true
+  }, [])
+
+  const value = useMemo(
+    () => ({
+      live,
+      drafts,
+      backendReady,
+      usingFallback,
+      loading,
+      createBulletin,
+      updateBulletin,
+      setStatus,
+      openAttachment,
+      refresh,
+    }),
+    [
+      live,
+      drafts,
+      backendReady,
+      usingFallback,
+      loading,
+      createBulletin,
+      updateBulletin,
+      setStatus,
+      openAttachment,
+      refresh,
+    ],
+  )
+
+  return (
+    <NewsBulletinContext.Provider value={value}>{children}</NewsBulletinContext.Provider>
+  )
+}
+
+export function useNewsBulletins() {
+  const ctx = useContext(NewsBulletinContext)
+  if (!ctx) {
+    throw new Error('useNewsBulletins must be used within NewsBulletinProvider')
+  }
+  return ctx
+}
