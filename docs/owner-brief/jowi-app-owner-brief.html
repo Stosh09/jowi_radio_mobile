@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>JOWI 98.1 FM App: Details Needed from the Station</title>
+<style>
+  :root {
+    --brown: #733500;
+    --deep: #2A1404;
+    --orange: #DA8226;
+    --blue: #1D8FCB;
+    --red: #D90203;
+    --ink: #2b1d12;
+    --muted: #7a6656;
+    --line: #e6d8c8;
+    --paper: #fffaf4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: #f3ebe1;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .page {
+    max-width: 820px;
+    margin: 24px auto;
+    background: var(--paper);
+    padding: 0 0 32px;
+    box-shadow: 0 6px 30px rgba(42, 20, 4, .12);
+  }
+  header {
+    background: linear-gradient(135deg, var(--deep), var(--brown) 70%, var(--orange));
+    color: #fff;
+    padding: 28px 36px 24px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  header img { width: 84px; height: 84px; border-radius: 50%; background: #fff; flex: none; }
+  header h1 { margin: 0 0 4px; font-size: 24px; letter-spacing: .3px; }
+  header p { margin: 0; opacity: .9; }
+  .stripe { height: 6px; background: linear-gradient(90deg, var(--red), var(--orange), var(--blue)); }
+  main { padding: 8px 36px 0; }
+  .intro {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-left: 5px solid var(--orange);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 20px 0 8px;
+  }
+  .intro p { margin: 6px 0; }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 8px; font-size: 13px; }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 99px;
+    vertical-align: middle;
+  }
+  .must { background: #fde3e3; color: var(--red); }
+  .nice { background: #e2f1fa; color: #136a98; }
+  section { margin-top: 26px; page-break-inside: avoid; }
+  h2 {
+    font-size: 17px;
+    color: var(--brown);
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  h2 .num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--brown); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px; flex: none;
+  }
+  .why { color: var(--muted); margin: 0 0 10px 36px; font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; background: #fff; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #f7ece0; font-size: 12px; text-transform: uppercase; letter-spacing: .4px; color: var(--brown); }
+  td.q { width: 38%; font-weight: 600; }
+  td.q small { display: block; font-weight: 400; color: var(--muted); }
+  td.a { min-height: 34px; }
+  .now { color: var(--muted); font-size: 12px; font-style: italic; }
+  .write { display: block; border-bottom: 1px dashed #c9b7a3; height: 24px; }
+  .box {
+    background: #fff; border: 1px solid var(--line); border-radius: 6px;
+    min-height: 90px; padding: 8px 10px; color: var(--muted); font-size: 12px;
+  }
+  .opt { display: block; margin: 3px 0; }
+  .opt::before { content: "\2610"; margin-right: 8px; font-size: 15px; color: var(--brown); }
+  .ok { white-space: nowrap; font-size: 12px; color: var(--muted); }
+  .ok::before { content: "\2610  Correct    \2610  Change"; white-space: pre; }
+  .gap td { background: #fff5e6; }
+  footer {
+    margin: 30px 36px 0;
+    padding-top: 14px;
+    border-top: 2px solid var(--line);
+    font-size: 13px;
+    color: var(--muted);
+  }
+  footer strong { color: var(--brown); }
+  @media print {
+    body { background: #fff; }
+    .page { box-shadow: none; margin: 0; max-width: none; }
+    header, .stripe, th, .must, .nice, h2 .num, .gap td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    @page { size: A4; margin: 12mm; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header>
+    <img src="../../mobile/assets/icon.png" alt="JOWI 98.1 FM logo" />
+    <div>
+      <h1>JOWI 98.1 FM Mobile App</h1>
+      <p>Details we need from the station before launch</p>
+    </div>
+  </header>
+  <div class="stripe"></div>
+
+  <main>
+    <div class="intro">
+      <p><strong>The app is built and working.</strong> Live streaming, the show schedule, listener messages, polls, news and the presenter booth all work today.</p>
+      <p>What's left is the station's own information: contact numbers, social pages, photos and prices. Some of these are still sample values. Please fill in what you can and send it back. Photos can be sent separately on WhatsApp or email.</p>
+      <p>Once we have these details, the app updates on listeners' phones automatically. They won't need to reinstall it.</p>
+      <div class="legend">
+        <span><span class="tag must">Needed</span> required before launch</span>
+        <span><span class="tag nice">Nice to have</span> can be added later</span>
+      </div>
+    </div>
+
+    <section>
+      <h2><span class="num">1</span> How listeners reach the studio <span class="tag must">Needed</span></h2>
+      <p class="why">The app has Call, SMS, WhatsApp and Email buttons. Right now they point to sample numbers.</p>
+      <table>
+        <tr><td class="q">Studio phone number for calls<small>The number listeners call during shows</small></td><td class="a"><span class="write"></span><span class="now">Currently a sample: +254 700 000 981</span></td></tr>
+        <tr><td class="q">SMS number<small>If different from the phone number above</small></td><td class="a"><span class="write"></span></td></tr>
+        <tr><td class="q">Studio WhatsApp number</td><td class="a"><span class="write"></span><span class="now">Currently a sample</span></td></tr>
+        <tr><td class="q">Station email address</td><td class="a"><span class="write"></span><span class="now">Currently: studio@jowi981.fm (please confirm it's real)</span></td></tr>
+        <tr><td class="q">Studio / office location<small>Town, plus a street or building if you want listeners to visit</small></td><td class="a"><span class="write"></span><span class="now">Currently just "Kenya"</span></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">2</span> Social media pages <span class="tag must">Needed</span></h2>
+      <p class="why">The social icons in the app open the general site home pages right now. Please give the full link to each page (copy it from the browser or the app's "Share" or "Copy link" option).</p>
+      <table>
+        <tr><td class="q">Facebook page link</td><td class="a"><span class="write"></span></td></tr>
+        <tr><td class="q">TikTok link</td><td class="a"><span class="write"></span></td></tr>
+        <tr><td class="q">YouTube channel link</td><td class="a"><span class="write"></span></td></tr>
+        <tr><td class="q">Instagram link</td><td class="a"><span class="write"></span></td></tr>
+        <tr><td class="q">Any others? (X/Twitter, etc.)</td><td class="a"><span class="write"></span></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">3</span> Website address <span class="tag must">Needed</span></h2>
+      <p class="why">When a listener taps "Share", the app sends a link to the station website. The website also supplies the logo shown on the phone's lock screen.</p>
+      <table>
+        <tr><td class="q">The station's website address<small>e.g. www.jowi981fm.com</small></td><td class="a"><span class="write"></span><span class="now">Currently assumed: jowi981.fm (please confirm)</span></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">4</span> About the station <span class="tag must">Needed</span></h2>
+      <p class="why">Shown on the app's "About" page.</p>
+      <table>
+        <tr><td class="q">Year the station went on air</td><td class="a"><span class="write"></span><span class="now">Currently a guess: 2018</span></td></tr>
+        <tr><td class="q">Motto / tagline</td><td class="a"><span class="ok"></span><br><span class="now">Currently: "jamuomo..."</span><span class="write"></span></td></tr>
+      </table>
+      <p style="margin:10px 0 4px;font-weight:600">A short description of the station (2–4 sentences): who you are, who you serve, and what makes JOWI special.</p>
+      <div class="box">Currently: "JOWI 98.1 FM is the voice of the community: music, talk, news, and culture that keeps jamuomo connected."</div>
+    </section>
+
+    <section>
+      <h2><span class="num">5</span> Show schedule: confirmed <span class="tag must">Needed</span></h2>
+      <p class="why">This is what the app shows as "On air now" and "Up next". Your corrected lineup is now live in the app. Only the two shaded gaps still need an answer — what airs in each?</p>
+      <table>
+        <tr><th>Day</th><th>Time</th><th>Show</th><th>Presenter(s)</th><th>Check</th></tr>
+        <tr><td rowspan="6"><strong>Mon–Fri</strong></td><td>05:00–10:00</td><td>Wuok Chieng'</td><td>Duncan Mcandiwo &amp; Jared Ojwang</td><td class="ok"></td></tr>
+        <tr><td>10:00–13:00</td><td>Jowi Tiyo</td><td>Mercyline Akinyi Ogweno</td><td class="ok"></td></tr>
+        <tr><td>13:00–16:00</td><td>Kamata Pozi Show</td><td>Javanly Joseph Onyango</td><td class="ok"></td></tr>
+        <tr><td>16:00–20:00</td><td>Jamuomo Drive</td><td>Mercy Auma Okuto</td><td class="ok"></td></tr>
+        <tr><td>20:00–00:00</td><td>Tipo Mbaka</td><td>Mwalimu Odhiambo Makowiti</td><td class="ok"></td></tr>
+        <tr><td>00:00–05:00</td><td>Jowi Express</td><td>Molly Nyasuba</td><td class="ok"></td></tr>
+
+        <tr><td rowspan="7"><strong>Saturday</strong></td><td>05:00–10:00</td><td>Sabato Moguedhi</td><td>Dupreez Okoth</td><td class="ok"></td></tr>
+        <tr><td>10:00–13:00</td><td>Tago Extra</td><td>Elfas Guya</td><td class="ok"></td></tr>
+        <tr class="gap"><td>13:00–14:00</td><td colspan="2"><strong>What airs here?</strong> <span class="write"></span></td><td></td></tr>
+        <tr><td>14:00–18:00</td><td>Paw Tuke</td><td>Raymond Jowi</td><td class="ok"></td></tr>
+        <tr><td>18:00–20:00</td><td>Rhumba Mix</td><td>Javanly Onyango</td><td class="ok"></td></tr>
+        <tr><td>20:00–00:00</td><td>Abila</td><td>Jared Ojwang</td><td class="ok"></td></tr>
+        <tr><td>00:00–05:00</td><td>Jowi Express</td><td>Levinta Nyamigori</td><td class="ok"></td></tr>
+
+        <tr><td rowspan="7"><strong>Sunday</strong></td><td>05:00–10:00</td><td>Hera Nyasaye</td><td>Raymond Jowi</td><td class="ok"></td></tr>
+        <tr><td>10:00–13:00</td><td>Mbak Keny</td><td>Molly Nyasuba</td><td class="ok"></td></tr>
+        <tr><td>13:00–16:00</td><td>I and I Reggae Show</td><td>Linet Nyasiaya</td><td class="ok"></td></tr>
+        <tr><td>16:00–19:00</td><td>Hema Mar Geno</td><td>Duncan Mcandiwo</td><td class="ok"></td></tr>
+        <tr class="gap"><td>19:00–20:00</td><td colspan="2"><strong>What airs here?</strong> (e.g. news) <span class="write"></span></td><td></td></tr>
+        <tr><td>20:00–00:00</td><td>Jowi Benga</td><td>Felix Leja</td><td class="ok"></td></tr>
+        <tr><td>00:00–05:00</td><td>Jowi Sunday Express</td><td>Levinta Nyamigori</td><td class="ok"></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">6</span> Presenters: photos and short bios <span class="tag nice">Nice to have</span></h2>
+      <p class="why">Right now each presenter card shows their initials only. A clear, smiling headshot of each presenter makes a big difference. Square photos work best; phone photos are fine. A one-line bio and their personal social handle are optional.</p>
+      <table>
+        <tr><th>Presenter</th><th>Photo sent?</th><th>One-line bio / nickname (optional)</th></tr>
+        <tr><td>Duncan Mcandiwo</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+        <tr><td>Jared Ojwang</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+        <tr><td>Mercyline Akinyi Ogweno</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+        <tr><td>Javanly Joseph Onyango</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+        <tr><td>Mercy Auma Okuto</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+        <tr><td>Mwalimu Odhiambo Makowiti</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+        <tr><td>Molly Nyasuba</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+        <tr><td>Dupreez Okoth</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+        <tr><td>Elfas Guya</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+        <tr><td>Raymond Jowi</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+        <tr><td>Levinta Nyamigori</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+        <tr><td>Linet Nyasiaya</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+        <tr><td>Felix Leja</td><td class="opt">Yes</td><td><span class="write"></span></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">7</span> Advertising <span class="tag must">Needed</span></h2>
+      <p class="why">The app has an "Advertise with us" page so businesses can book ads. The prices below are <strong>samples we made up</strong>. Please correct them, or choose to hide prices.</p>
+      <table>
+        <tr><th>Package</th><th>Sample price in the app now</th><th>Real price</th></tr>
+        <tr><td><strong>App banner</strong><br><small>Advertiser's banner shown in the app while people listen</small></td><td>KES 15,000/week · 45,000/month</td><td><span class="write"></span></td></tr>
+        <tr><td><strong>Spot ads</strong><br><small>15–30 sec commercials on air</small></td><td>From KES 3,000/spot · weekly from 18,000</td><td><span class="write"></span></td></tr>
+        <tr><td><strong>Show sponsorship</strong><br><small>"Brought to you by…" plus live mentions</small></td><td>From KES 50,000/week (Morning show 75,000)</td><td><span class="write"></span></td></tr>
+        <tr><td><strong>Full campaign</strong><br><small>Radio + app banner + mentions</small></td><td>From KES 150,000 (4 weeks)</td><td><span class="write"></span></td></tr>
+      </table>
+      <table style="margin-top:10px">
+        <tr><td class="q">How should prices appear?</td><td>
+          <span class="opt">Show the real prices</span>
+          <span class="opt">Hide prices, show "Contact us for rates"</span>
+        </td></tr>
+        <tr><td class="q">Sales contact for advertisers<small>Name + phone/WhatsApp, if different from the studio line</small></td><td class="a"><span class="write"></span></td></tr>
+        <tr><td class="q">Any current advertisers to show in the app now?<small>For each: business name, short headline, link or WhatsApp number, logo, start and end dates</small></td><td class="a"><span class="write"></span><span class="write"></span></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">8</span> Quick decisions <span class="tag must">Needed</span></h2>
+      <table>
+        <tr><td class="q">Live listener count<small>The app shows how many people are listening. If the live count can't load:</small></td><td>
+          <span class="opt">Hide the count (recommended)</span>
+          <span class="opt">Show an estimated number</span>
+        </td></tr>
+        <tr><td class="q">Who should have access to the Presenter Booth?<small>The booth is where presenters read news, see messages and send alerts. Access uses one shared password.</small></td><td class="a"><span class="write"></span><span class="write"></span></td></tr>
+        <tr><td class="q">Who can send push notifications to all listeners?<small>e.g. "We're live with a special guest!"</small></td><td>
+          <span class="opt">Presenters on duty</span>
+          <span class="opt">Station manager only</span>
+        </td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">9</span> Publishing on Google Play <span class="tag must">Needed</span></h2>
+      <p class="why">To put the app on the Play Store under the station's name, the station should own the store account. That way the app stays yours even if the developer changes.</p>
+      <table>
+        <tr><td class="q">Google Play developer account<small>One-time fee of US$25, registered by the station</small></td><td>
+          <span class="opt">Station already has one</span>
+          <span class="opt">Station will create one</span>
+          <span class="opt">Developer should create it for us</span>
+        </td></tr>
+        <tr><td class="q">Google (Gmail) account that will own the app<small>Also used for push notifications (Firebase)</small></td><td class="a"><span class="write"></span></td></tr>
+        <tr><td class="q">App name on the Play Store</td><td class="a"><span class="write"></span><span class="now">Suggested: "JOWI 98.1 FM"</span></td></tr>
+        <tr><td class="q">Support email shown on the Play Store<small>Google requires one. Listeners use it for app help</small></td><td class="a"><span class="write"></span></td></tr>
+        <tr><td class="q">Privacy policy<small>Google requires one. We can draft it for the station to approve</small></td><td>
+          <span class="opt">Please draft one for us</span>
+          <span class="opt">We have one: link below</span>
+          <span class="write"></span>
+        </td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2><span class="num">10</span> Anything else? <span class="tag nice">Nice to have</span></h2>
+      <p class="why">Upcoming events, competitions, segments you want promoted, or anything you'd like the app to do.</p>
+      <div class="box"></div>
+    </section>
+  </main>
+
+  <footer>
+    <strong>How to send this back:</strong> fill it in (typing or handwriting is fine), then send a photo or PDF of it on WhatsApp or by email, together with the presenter photos and logos. Items marked <span class="tag must">Needed</span> are what we need to launch; everything else can follow later.
+  </footer>
+</div>
+</body>
+</html>
