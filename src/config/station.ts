@@ -13,14 +13,12 @@ export const STATION = {
     location: 'Kenya',
     founded: '2018',
     email: 'studio@jowi981.fm',
-    phone: '+254 700 000 981',
-    whatsapp: '254700000981',
+    phone: '+254 750 499 077',
+    whatsapp: '254141396517',
   },
   social: {
-    facebook: 'https://facebook.com',
-    tiktok: 'https://tiktok.com',
-    youtube: 'https://youtube.com',
-    instagram: 'https://instagram.com',
+    facebook: 'https://www.facebook.com/share/1A8AeywT59/',
+    tiktok: 'https://www.tiktok.com/@jowi.98.1.fm',
   },
   presenterPin: 'jowi981',
 } as const

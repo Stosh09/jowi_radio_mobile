@@ -5,8 +5,10 @@ Booth desk is production-usable for news, Interact, and poll. Below is what is *
 ## Content (station / marketing)
 
 - [ ] Real **About** copy (more than the short blurb)
-- [ ] Real **email, phone, WhatsApp** (replace placeholders in `src/config/station.ts`)
-- [ ] Real **Facebook / TikTok / YouTube / Instagram** URLs
+- [x] Real **studio phone + WhatsApp** (replaced placeholders in `src/config/station.ts`)
+- [ ] Confirm station **email** (`studio@jowi981.fm`) and office **location**
+- [x] Real **Facebook / TikTok** URLs
+- [ ] Real **YouTube / Instagram** URLs (icons hidden in the app until provided)
 - [ ] **Presenter photos** + bios written by the station
 - [ ] Confirm **schedule** open notes in `SCHEDULE_NOTES` (Sunday gap, overnight slots, etc.)
 - [ ] Archive any leftover **demo bulletins** still in the Supabase `news_bulletins` table from early setup

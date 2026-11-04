@@ -1,12 +1,6 @@
 import { Link } from 'react-router-dom'
 import { STATION } from '../../config/station'
-import {
-  FacebookIcon,
-  InstagramIcon,
-  TiktokIcon,
-  WhatsappIcon,
-  YoutubeIcon,
-} from '../SocialIcons'
+import { FacebookIcon, TiktokIcon, WhatsappIcon } from '../SocialIcons'
 
 const socialLinkClass =
   'inline-flex items-center justify-center rounded-md bg-white/10 p-2.5 text-white transition hover:bg-white/20'
@@ -77,26 +71,6 @@ export function SiteFooter() {
               className={socialLinkClass}
             >
               <FacebookIcon size={18} />
-            </a>
-            <a
-              href={STATION.social.instagram}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram"
-              title="Instagram"
-              className={socialLinkClass}
-            >
-              <InstagramIcon size={18} />
-            </a>
-            <a
-              href={STATION.social.youtube}
-              target="_blank"
-              rel="noreferrer"
-              aria-label="YouTube"
-              title="YouTube"
-              className={socialLinkClass}
-            >
-              <YoutubeIcon size={18} />
             </a>
             <a
               href={STATION.social.tiktok}

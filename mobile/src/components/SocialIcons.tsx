@@ -29,8 +29,6 @@ export function BrandIcon({ name, size = 20, color = colors.white }: { name: key
 const LINKS: { key: keyof typeof STATION.social; label: string }[] = [
   { key: 'facebook', label: 'Facebook' },
   { key: 'tiktok', label: 'TikTok' },
-  { key: 'youtube', label: 'YouTube' },
-  { key: 'instagram', label: 'Instagram' },
 ]
 
 export function SocialRow() {
