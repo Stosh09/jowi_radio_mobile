@@ -13,7 +13,9 @@
     "doctor": "expo-doctor",
     "build:dev": "eas build -p android --profile development",
     "build:apk": "eas build -p android --profile preview",
-    "build:release": "eas build -p android --profile production"
+    "build:release": "eas build -p android --profile production",
+    "update:preview": "eas update --channel preview --environment preview --platform android",
+    "update:production": "eas update --channel production --environment production --platform android"
   },
   "dependencies": {
     "@expo-google-fonts/caveat": "^0.4.2",
@@ -45,6 +47,7 @@
     "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
     "expo-system-ui": "~57.0.4",
+    "expo-updates": "~57.0.24",
     "expo-web-browser": "~57.0.3",
     "jszip": "^3.10.2",
     "lucide-react-native": "^1.52.0",

@@ -24,12 +24,20 @@
         "android.permission.POST_NOTIFICATIONS",
         "android.permission.MODIFY_AUDIO_SETTINGS",
         "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
       ],
       "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
         "android.permission.RECORD_AUDIO"
       ],
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "runtimeVersion": {
+        "policy": "fingerprint"
+      }
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -86,6 +94,9 @@
         "projectId": "4544aa50-06bc-4dea-be79-23211d8e6783"
       }
     },
-    "owner": "stosh.w"
+    "owner": "stosh.w",
+    "updates": {
+      "url": "https://u.expo.dev/4544aa50-06bc-4dea-be79-23211d8e6783"
+    }
   }
 }

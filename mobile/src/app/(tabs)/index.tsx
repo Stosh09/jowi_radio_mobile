@@ -44,7 +44,7 @@ export default function ListenScreen() {
     <Screen padTop={false} contentStyle={{ paddingHorizontal: 0 }} onRefresh={onRefresh} refreshing={refreshing}>
       {/* Hero */}
       <View style={styles.hero}>
-        <Image source={require('../../../assets/studio-hero.png')} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition={{ top: '28%' }} />
+        <Image source={require('../../../assets/studio-hero.jpg')} style={StyleSheet.absoluteFill} contentFit="cover" contentPosition={{ top: '28%' }} />
         <LinearGradient
           colors={['rgba(0,0,0,0.82)', 'rgba(0,0,0,0.7)', colors.bg]}
           locations={[0, 0.55, 1]}

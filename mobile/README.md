@@ -51,6 +51,17 @@ npm run build:apk      # installable APK for testing / sideloading
 npm run build:release  # Play Store app bundle (.aab)
 ```
 
+### Live (OTA) updates
+
+Preview and production builds get JavaScript changes over the air through EAS Update. Phones download the update on launch and switch to it on the next launch (or right away from Settings → App → Restart).
+
+```bash
+npm run update:preview -- --message "Fix poll layout"      # testers on the preview APK
+npm run update:production -- --message "Fix poll layout"   # Play Store users
+```
+
+The runtime version uses the `fingerprint` policy, so an update only reaches builds with matching native code. After adding a native package or changing `app.json`, make a new build.
+
 Push on Android needs FCM credentials: run `eas credentials` and upload a Firebase service-account key, as described in [Expo's push setup guide](https://docs.expo.dev/push-notifications/push-notifications-setup/).
 
 ## Backend (once)

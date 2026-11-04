@@ -1,4 +1,6 @@
+import Constants from 'expo-constants'
 import { router } from 'expo-router'
+import * as Updates from 'expo-updates'
 import { useEffect, useState } from 'react'
 import { Linking, StyleSheet, Switch, Text, View } from 'react-native'
 import { Button, Card, Notice, Screen, Segmented, Txt } from '../components/ui'
@@ -125,7 +127,69 @@ export default function SettingsScreen() {
           ) : null}
         </View>
       </Card>
+
+      <Txt variant="eyebrow" style={{ marginTop: space.xl }}>
+        App
+      </Txt>
+      <AppUpdatesCard />
     </Screen>
+  )
+}
+
+function AppUpdatesCard() {
+  const { isChecking, isDownloading, isUpdatePending, currentlyRunning, checkError, downloadError } = Updates.useUpdates()
+  const [note, setNote] = useState<string | null>(null)
+
+  const check = async () => {
+    setNote(null)
+    try {
+      const result = await Updates.checkForUpdateAsync()
+      if (result.isAvailable) await Updates.fetchUpdateAsync()
+      else setNote('You have the latest version.')
+    } catch {
+      setNote('Could not check for updates. Try again on a better connection.')
+    }
+  }
+
+  const version = Constants.expoConfig?.version ?? '1.0.0'
+  const published = currentlyRunning.createdAt
+    ? currentlyRunning.createdAt.toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' })
+    : null
+  const error = checkError ?? downloadError
+
+  return (
+    <Card style={{ marginTop: space.sm, paddingVertical: 4 }}>
+      <View style={[styles.row, { borderBottomWidth: 0 }]}>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.label}>Version {version}</Text>
+          <Text style={styles.detail}>
+            {!Updates.isEnabled
+              ? 'Live updates are off in development builds.'
+              : isUpdatePending
+                ? 'An update is ready. Restart to use it.'
+                : note ??
+                  (error
+                    ? 'Last update check failed.'
+                    : published && !currentlyRunning.isEmbeddedLaunch
+                      ? `Updated ${published}`
+                      : 'Updates download automatically.')}
+          </Text>
+        </View>
+        {Updates.isEnabled ? (
+          isUpdatePending ? (
+            <Button label="Restart" compact onPress={() => void Updates.reloadAsync()} />
+          ) : (
+            <Button
+              label="Check"
+              compact
+              variant="outline"
+              loading={isChecking || isDownloading}
+              onPress={() => void check()}
+            />
+          )
+        ) : null}
+      </View>
+    </Card>
   )
 }
 

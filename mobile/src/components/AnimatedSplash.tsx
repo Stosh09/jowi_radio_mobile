@@ -28,6 +28,11 @@ const LAYERS = {
 /** Native splash: imageWidth 240 in app.json, disc drawn at 64% of the image. */
 const NATIVE_DISC = 240 * 0.64
 
+const GALLOPS = 5
+const GALLOP_MS = 1050
+const HOLD_MS = 1300
+const TAP_HOLD_MS = 1200
+
 const IMAGES = {
   disc: require('../../assets/splash/disc.png') as ImageSourcePropType,
   bull: require('../../assets/splash/bull.png') as ImageSourcePropType,
@@ -41,8 +46,9 @@ const timing = (value: Animated.Value, toValue: number, duration: number, easing
   Animated.timing(value, { toValue, duration, easing, ...native })
 
 /**
- * Brand intro over the native splash: the bull gallops into the ring, the mic drops,
- * the wordmark rises and "jamuomo…" writes itself in. Tap to skip.
+ * Brand intro over the native splash: the bull gallops into the ring, then the mic,
+ * frequency and motto pop in and the finished logo holds for a moment before the app opens.
+ * Tapping during the intro completes the logo; tapping while it holds opens the app.
  */
 export function AnimatedSplash({ ready, onFinish }: { ready: boolean; onFinish: () => void }) {
   const { width, height } = useWindowDimensions()
@@ -63,12 +69,23 @@ export function AnimatedSplash({ ready, onFinish }: { ready: boolean; onFinish: 
     word: new Animated.Value(0),
     tagline: new Animated.Value(0),
     pulse: new Animated.Value(1),
+    glow: new Animated.Value(0),
     exit: new Animated.Value(0),
   }))
   const [introDone, setIntroDone] = useState(false)
   const startedRef = useRef(false)
   const exitingRef = useRef(false)
   const introRef = useRef<Animated.CompositeAnimation | null>(null)
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hapticTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(
+    () => () => {
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current)
+      if (hapticTimerRef.current) clearTimeout(hapticTimerRef.current)
+    },
+    [],
+  )
 
   const showAll = () => {
     v.disc.setValue(1)
@@ -80,59 +97,70 @@ export function AnimatedSplash({ ready, onFinish }: { ready: boolean; onFinish: 
     v.tagline.setValue(1)
   }
 
+  /** Let the finished logo be admired: the glow swells, then the app opens. */
+  const hold = (ms: number) => {
+    if (holdTimerRef.current) return
+    timing(v.glow, 1, ms + 500, Easing.inOut(Easing.quad)).start()
+    holdTimerRef.current = setTimeout(() => setIntroDone(true), ms)
+  }
+
   const start = async () => {
     if (startedRef.current) return
     startedRef.current = true
     await SplashScreen.hideAsync().catch(() => {})
     if (await AccessibilityInfo.isReduceMotionEnabled()) {
       showAll()
-      setTimeout(() => setIntroDone(true), 700)
+      hold(HOLD_MS)
       return
     }
 
-    const gallop = Animated.loop(timing(v.gallop, 1, 210, Easing.linear), { iterations: 5 })
+    const pop = (value: Animated.Value) => Animated.spring(value, { toValue: 1, friction: 5, tension: 110, ...native })
     const intro = Animated.sequence([
       Animated.parallel([
-        Animated.spring(v.disc, { toValue: 1, friction: 7, tension: 60, ...native }),
-        timing(v.halo, 1, 500),
+        Animated.spring(v.disc, { toValue: 1, friction: 8, tension: 90, ...native }),
+        timing(v.halo, 1, 450),
       ]),
       Animated.parallel([
-        timing(v.bullX, 0, 950),
-        gallop,
-        Animated.sequence([Animated.delay(550), timing(v.amp, 0, 400, Easing.inOut(Easing.quad))]),
+        timing(v.bullX, 0, GALLOP_MS),
+        timing(v.gallop, GALLOPS, GALLOP_MS, Easing.linear),
+        Animated.sequence([Animated.delay(GALLOP_MS * 0.55), timing(v.amp, 0, GALLOP_MS * 0.45, Easing.inOut(Easing.quad))]),
       ]),
       Animated.parallel([
         Animated.sequence([timing(v.squash, 0.92, 90), Animated.spring(v.squash, { toValue: 1, friction: 4, ...native })]),
         timing(v.dust, 1, 650),
         timing(v.ring, 1, 700),
-        Animated.sequence([
-          Animated.delay(80),
-          Animated.spring(v.mic, { toValue: 1, friction: 5, tension: 80, ...native }),
-        ]),
-        Animated.sequence([Animated.delay(240), timing(v.word, 1, 380)]),
-        Animated.sequence([Animated.delay(480), timing(v.tagline, 1, 560, Easing.inOut(Easing.quad))]),
+        Animated.sequence([Animated.delay(120), Animated.spring(v.mic, { toValue: 1, friction: 5, tension: 80, ...native })]),
+        Animated.sequence([Animated.delay(380), pop(v.word)]),
+        Animated.sequence([Animated.delay(640), pop(v.tagline)]),
       ]),
-      Animated.sequence([timing(v.pulse, 1.06, 180), timing(v.pulse, 1, 260, Easing.inOut(Easing.quad))]),
+      Animated.sequence([timing(v.pulse, 1.06, 200), timing(v.pulse, 1, 300, Easing.inOut(Easing.quad))]),
     ])
     introRef.current = intro
-    setTimeout(() => haptic.tap(), 300 + 950)
-    intro.start(() => setIntroDone(true))
+    hapticTimerRef.current = setTimeout(() => haptic.tap(), 450 + GALLOP_MS)
+    intro.start(({ finished }) => {
+      if (finished) hold(HOLD_MS)
+    })
   }
 
   const exit = () => {
     if (exitingRef.current) return
     exitingRef.current = true
-    timing(v.exit, 1, 380, Easing.in(Easing.quad)).start(() => onFinish())
+    timing(v.exit, 1, 500, Easing.in(Easing.quad)).start(() => onFinish())
   }
 
   useEffect(() => {
     if (introDone && ready) exit()
   })
 
-  const skip = () => {
+  const onTap = () => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current)
+      setIntroDone(true)
+      return
+    }
     introRef.current?.stop()
     showAll()
-    setIntroDone(true)
+    hold(TAP_HOLD_MS)
   }
 
   const pos = (key: keyof typeof LAYERS) => {
@@ -146,9 +174,16 @@ export function AnimatedSplash({ ready, onFinish }: { ready: boolean; onFinish: 
     }
   }
 
-  const bob = Animated.multiply(v.gallop.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0, 1, 0] }), v.amp)
+  const strides = Array.from({ length: GALLOPS * 2 + 1 }, (_, i) => i / 2)
+  const bob = Animated.multiply(
+    v.gallop.interpolate({ inputRange: strides, outputRange: strides.map((_, i) => i % 2) }),
+    v.amp,
+  )
+  const popIn = (value: Animated.Value) => ({
+    opacity: value.interpolate({ inputRange: [0, 0.35], outputRange: [0, 1], extrapolate: 'clamp' }),
+    transform: [{ scale: value.interpolate({ inputRange: [0, 1], outputRange: [0.35, 1] }) }],
+  })
   const bullBox = pos('bull')
-  const taglineBox = pos('tagline')
 
   return (
     <Animated.View
@@ -157,7 +192,7 @@ export function AnimatedSplash({ ready, onFinish }: { ready: boolean; onFinish: 
       accessible
       accessibilityLabel="JOWI 98.1 FM"
     >
-      <Pressable style={StyleSheet.absoluteFill} onPress={skip} accessibilityRole="button" accessibilityHint="Skip intro">
+      <Pressable style={StyleSheet.absoluteFill} onPress={onTap} accessibilityRole="button" accessibilityHint="Skip intro">
         <LinearGradient
           colors={['#3D1E07', colors.splashBg, '#170A02']}
           locations={[0, 0.5, 1]}
@@ -173,7 +208,11 @@ export function AnimatedSplash({ ready, onFinish }: { ready: boolean; onFinish: 
                   width: D * k,
                   height: D * k,
                   borderRadius: (D * k) / 2,
-                  opacity: Animated.multiply(v.halo, [0.05, 0.08, 0.12][i]),
+                  opacity: Animated.multiply(
+                    v.halo,
+                    v.glow.interpolate({ inputRange: [0, 1], outputRange: [1, 1.8].map((m) => m * [0.05, 0.08, 0.12][i]) }),
+                  ),
+                  transform: [{ scale: v.glow.interpolate({ inputRange: [0, 1], outputRange: [1, 1.1] }) }],
                 },
               ]}
             />
@@ -268,27 +307,10 @@ export function AnimatedSplash({ ready, onFinish }: { ready: boolean; onFinish: 
               <Animated.Image
                 source={IMAGES.wordmark}
                 fadeDuration={0}
-                style={[
-                  pos('wordmark'),
-                  {
-                    opacity: v.word,
-                    transform: [{ translateY: v.word.interpolate({ inputRange: [0, 1], outputRange: [D * 0.06, 0] }) }],
-                  },
-                ]}
+                style={[pos('wordmark'), popIn(v.word)]}
               />
 
-              <Image source={IMAGES.tagline} fadeDuration={0} style={taglineBox} />
-              <Animated.View
-                style={[
-                  taglineBox,
-                  styles.wipe,
-                  {
-                    transform: [
-                      { translateX: v.tagline.interpolate({ inputRange: [0, 1], outputRange: [0, taglineBox.width + 4] }) },
-                    ],
-                  },
-                ]}
-              />
+              <Animated.Image source={IMAGES.tagline} fadeDuration={0} style={[pos('tagline'), popIn(v.tagline)]} />
             </View>
           </Animated.View>
         </View>
@@ -303,5 +325,4 @@ const styles = StyleSheet.create({
   halo: { position: 'absolute', backgroundColor: colors.brandOrange },
   ringPulse: { position: 'absolute', borderWidth: 3, borderColor: colors.brandOrange },
   dust: { position: 'absolute', backgroundColor: colors.brandBrown },
-  wipe: { backgroundColor: colors.white },
 })
