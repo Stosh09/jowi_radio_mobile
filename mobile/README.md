@@ -60,7 +60,9 @@ npm run update:preview -- --message "Fix poll layout"      # testers on the prev
 npm run update:production -- --message "Fix poll layout"   # Play Store users
 ```
 
-The runtime version uses the `fingerprint` policy, so an update only reaches builds with matching native code. After adding a native package or changing `app.json`, make a new build.
+The runtime version follows the app version (`appVersion` policy → `expo.version` in app.json), so an update reaches every build with the same app version. **Bump `expo.version` whenever native code changes** (new native package, config plugin or permission change) and make a new build — otherwise an update could reach a build that lacks the native code.
+
+The `fingerprint` policy is deliberately not used: on SDK 57 CNG projects EAS computes the fingerprint *after* prebuild (including the generated `android/` dir) while the local fingerprint is computed pre-prebuild and from Windows, so the two never match and every build failed at the Configure expo-updates phase (see [expo/expo#47943](https://github.com/expo/expo/issues/47943)).
 
 Push on Android needs FCM credentials: run `eas credentials` and upload a Firebase service-account key, as described in [Expo's push setup guide](https://docs.expo.dev/push-notifications/push-notifications-setup/).
 
