@@ -74,8 +74,8 @@ export const SCHEDULE: ScheduleBlock[] = [
         time: '10:00 – 13:00',
         startMinutes: hm(10),
         endMinutes: hm(13),
-        host: 'Mercyline Akinyi Ogweno',
-        hostIds: ['mercyline-akinyi-ogweno'],
+        host: 'Mercyline Akinyi Ogweno & Linda',
+        hostIds: ['mercyline-akinyi-ogweno', 'linda'],
       },
       {
         id: 'weekday-kamata-pozi',
@@ -260,6 +260,13 @@ export const PRESENTERS: Presenter[] = [
     role: 'Broadcast Journalist',
     show: 'Jowi Tiyo',
     bio: 'Professional broadcast journalist dedicated to credible journalism and public accountability. Focus on health, governance and community development.',
+  },
+  {
+    id: 'linda',
+    name: 'Linda',
+    role: 'Mid-morning host',
+    show: 'Jowi Tiyo',
+    bio: 'Co-hosts Jowi Tiyo on weekday mid-mornings with Mercyline Akinyi Ogweno.',
   },
   {
     id: 'javanly-onyango',
