@@ -109,7 +109,7 @@ export default function RootLayout() {
           </PlayerProvider>
         </PreferencesProvider>
       ) : null}
-      {!introDone ? <AnimatedSplash ready={ready} onFinish={() => setIntroDone(true)} /> : null}
+      {!introDone ? <AnimatedSplash ready={ready} onFinish={() => setIntroDone(true)} onLayout={() => { void SplashScreen.hideAsync() }} /> : null}
     </SafeAreaProvider>
   )
 }
