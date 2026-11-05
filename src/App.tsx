@@ -1,4 +1,6 @@
 import { lazy, Suspense } from 'react'
+import { useEffect, useState } from 'react'
+import { SplashScreen } from './components/SplashScreen'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/layout/Layout'
 import { AudioPlayerProvider } from './context/AudioPlayerContext'
@@ -37,8 +39,17 @@ function PageFallback() {
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(() => {
+    try { return !sessionStorage.getItem('jowi-splash-shown') } catch { return true }
+  })
+  useEffect(() => {
+    if (!showSplash) return
+    try { sessionStorage.setItem('jowi-splash-shown', '1') } catch {}
+  }, [showSplash])
   return (
-    <BrowserRouter>
+    <>
+      {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+      <BrowserRouter>
       <PresenterAuthProvider>
         <AudioPlayerProvider>
           <InteractionProvider>
@@ -61,6 +72,7 @@ export default function App() {
           </InteractionProvider>
         </AudioPlayerProvider>
       </PresenterAuthProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </>
   )
 }
