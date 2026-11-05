@@ -1,328 +1,187 @@
-import { LinearGradient } from 'expo-linear-gradient'
-import * as SplashScreen from 'expo-splash-screen'
-import { useEffect, useRef, useState } from 'react'
-import {
-  AccessibilityInfo,
-  Animated,
-  Easing,
-  Image,
-  Pressable,
-  StyleSheet,
-  useWindowDimensions,
-  View,
-  type ImageSourcePropType,
-} from 'react-native'
-import { haptic } from '../lib/haptics'
-import { colors } from '../theme'
+import React, { useEffect, useMemo, useRef } from 'react';
+import { Animated, Easing, StyleSheet, useWindowDimensions, View } from 'react-native';
+import Svg, { Circle, Defs, LinearGradient, Stop, SvgXml } from 'react-native-svg';
+import { LAYERS, VIEWBOX } from '../jowiLayers';
 
-/** Layer rectangles in the 442px logo circle (see assets/splash). */
-const SRC = 442
-const FACE_R = 209.5
-const FACE_INSET = SRC / 2 - FACE_R
-const LAYERS = {
-  bull: { left: 69, top: 105, width: 215, height: 166 },
-  mic: { left: 296, top: 105, width: 66, height: 166 },
-  wordmark: { left: 54, top: 277, width: 336, height: 61 },
-  tagline: { left: 78, top: 337, width: 290, height: 42 },
-} as const
-/** Native splash: imageWidth 240 in app.json, disc drawn at 64% of the image. */
-const NATIVE_DISC = 240 * 0.64
+const BULL_BROWN = '#4a0f07'; // sampled from the bull's mane and horns, lightened slightly
+const BLUE = '#054165';
+const RED = '#a60716';
+// Broadcast pulses: gradient rings that radiate out from the badge, staggered, looping until the app is ready.
+const PULSES = [
+  { id: 'gA', from: '#ff8a1f', to: '#b3111f', width: 6, delay: 0, x1: 0, y1: 0, x2: 1, y2: 1 },
+  { id: 'gB', from: '#ffd76e', to: '#ff7a1a', width: 4, delay: 600, x1: 1, y1: 0, x2: 0, y2: 1 },
+  { id: 'gC', from: '#1d78b8', to: '#7fdcff', width: 3, delay: 1200, x1: 0, y1: 1, x2: 1, y2: 0 },
+] as const;
+const PULSE_MS = 1800;
+const PULSE_START = 1000; // lines up with the mic lighting up
+const PULSE_SCALE = 1.55;
 
-const GALLOPS = 5
-const GALLOP_MS = 1050
-const HOLD_MS = 1300
-const TAP_HOLD_MS = 1200
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-const IMAGES = {
-  disc: require('../../assets/splash/disc.png') as ImageSourcePropType,
-  bull: require('../../assets/splash/bull.png') as ImageSourcePropType,
-  mic: require('../../assets/splash/mic.png') as ImageSourcePropType,
-  wordmark: require('../../assets/splash/wordmark.png') as ImageSourcePropType,
-  tagline: require('../../assets/splash/tagline.png') as ImageSourcePropType,
-}
+type Props = {
+  /** Set true when fonts/data are ready; the splash then fades out and calls onDone. */
+  ready: boolean;
+  onFinish: () => void;
+  /** Called once the first frame is on screen, so you can hide the native splash. */
+  onLayout?: () => void;
+};
 
-const native = { useNativeDriver: true } as const
-const timing = (value: Animated.Value, toValue: number, duration: number, easing = Easing.out(Easing.cubic)) =>
-  Animated.timing(value, { toValue, duration, easing, ...native })
+export function AnimatedSplash({ ready, onFinish, onLayout }: Props) {
+  const { width } = useWindowDimensions();
+  const S = Math.min(width * 0.86, 420);
+  const k = S / VIEWBOX;
 
-/**
- * Brand intro over the native splash: the bull gallops into the ring, then the mic,
- * frequency and motto pop in and the finished logo holds for a moment before the app opens.
- * Tapping during the intro completes the logo; tapping while it holds opens the app.
- */
-export function AnimatedSplash({ ready, onFinish }: { ready: boolean; onFinish: () => void }) {
-  const { width, height } = useWindowDimensions()
-  const D = Math.min(width * 0.74, height * 0.42, 320)
-  const s = D / SRC
-  const face = FACE_R * 2 * s
-
-  const [v] = useState(() => ({
-    disc: new Animated.Value(NATIVE_DISC / D),
-    halo: new Animated.Value(0),
-    bullX: new Animated.Value(-1),
-    gallop: new Animated.Value(0),
-    amp: new Animated.Value(1),
-    squash: new Animated.Value(1),
-    dust: new Animated.Value(0),
-    ring: new Animated.Value(0),
-    mic: new Animated.Value(0),
-    word: new Animated.Value(0),
-    tagline: new Animated.Value(0),
-    pulse: new Animated.Value(1),
-    glow: new Animated.Value(0),
-    exit: new Animated.Value(0),
-  }))
-  const [introDone, setIntroDone] = useState(false)
-  const startedRef = useRef(false)
-  const exitingRef = useRef(false)
-  const introRef = useRef<Animated.CompositeAnimation | null>(null)
-  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const hapticTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  useEffect(
-    () => () => {
-      if (holdTimerRef.current) clearTimeout(holdTimerRef.current)
-      if (hapticTimerRef.current) clearTimeout(hapticTimerRef.current)
-    },
-    [],
-  )
-
-  const showAll = () => {
-    v.disc.setValue(1)
-    v.halo.setValue(1)
-    v.bullX.setValue(0)
-    v.amp.setValue(0)
-    v.mic.setValue(1)
-    v.word.setValue(1)
-    v.tagline.setValue(1)
-  }
-
-  /** Let the finished logo be admired: the glow swells, then the app opens. */
-  const hold = (ms: number) => {
-    if (holdTimerRef.current) return
-    timing(v.glow, 1, ms + 500, Easing.inOut(Easing.quad)).start()
-    holdTimerRef.current = setTimeout(() => setIntroDone(true), ms)
-  }
-
-  const start = async () => {
-    if (startedRef.current) return
-    startedRef.current = true
-    await SplashScreen.hideAsync().catch(() => {})
-    if (await AccessibilityInfo.isReduceMotionEnabled()) {
-      showAll()
-      hold(HOLD_MS)
-      return
-    }
-
-    const pop = (value: Animated.Value) => Animated.spring(value, { toValue: 1, friction: 5, tension: 110, ...native })
-    const intro = Animated.sequence([
-      Animated.parallel([
-        Animated.spring(v.disc, { toValue: 1, friction: 8, tension: 90, ...native }),
-        timing(v.halo, 1, 450),
+  const v = useMemo(() => {
+    const t = () => new Animated.Value(0);
+    return { disc: t(), ring: t(), slide: t(), squash: t(), head: t(), tail: t(), mic: t(), wl: t(), wr: t(), t981: t(), jam: t(), dust: t(), loop: t(), out: new Animated.Value(1) };
+  }, []);
+  const started = useRef(false);
+  const pulse = useMemo(() => PULSES.map(() => new Animated.Value(0)), []);
+  useEffect(() => {
+    const loops = pulse.map((p, i) =>
+      Animated.sequence([
+        Animated.delay(PULSE_START + PULSES[i].delay),
+        Animated.loop(Animated.timing(p, { toValue: 1, duration: PULSE_MS, easing: Easing.bezier(0.15, 0.6, 0.3, 1), useNativeDriver: true })),
       ]),
-      Animated.parallel([
-        timing(v.bullX, 0, GALLOP_MS),
-        timing(v.gallop, GALLOPS, GALLOP_MS, Easing.linear),
-        Animated.sequence([Animated.delay(GALLOP_MS * 0.55), timing(v.amp, 0, GALLOP_MS * 0.45, Easing.inOut(Easing.quad))]),
-      ]),
-      Animated.parallel([
-        Animated.sequence([timing(v.squash, 0.92, 90), Animated.spring(v.squash, { toValue: 1, friction: 4, ...native })]),
-        timing(v.dust, 1, 650),
-        timing(v.ring, 1, 700),
-        Animated.sequence([Animated.delay(120), Animated.spring(v.mic, { toValue: 1, friction: 5, tension: 80, ...native })]),
-        Animated.sequence([Animated.delay(380), pop(v.word)]),
-        Animated.sequence([Animated.delay(640), pop(v.tagline)]),
-      ]),
-      Animated.sequence([timing(v.pulse, 1.06, 200), timing(v.pulse, 1, 300, Easing.inOut(Easing.quad))]),
-    ])
-    introRef.current = intro
-    hapticTimerRef.current = setTimeout(() => haptic.tap(), 450 + GALLOP_MS)
-    intro.start(({ finished }) => {
-      if (finished) hold(HOLD_MS)
-    })
-  }
+    );
+    loops.forEach((l) => l.start());
+    return () => loops.forEach((l) => l.stop());
+  }, [pulse]);
 
-  const exit = () => {
-    if (exitingRef.current) return
-    exitingRef.current = true
-    timing(v.exit, 1, 500, Easing.in(Easing.quad)).start(() => onFinish())
-  }
+  const tm = (val: Animated.Value, to: number, duration: number, delay: number, easing = Easing.out(Easing.cubic)) =>
+    Animated.timing(val, { toValue: to, duration, delay, easing, useNativeDriver: val === v.ring ? false : true });
 
   useEffect(() => {
-    if (introDone && ready) exit()
-  })
+    if (started.current) return;
+    started.current = true;
+    Animated.parallel([
+      tm(v.disc, 1, 450, 0),
+      tm(v.ring, 1, 600, 0),
+      tm(v.slide, 1, 550, 300, Easing.out(Easing.back(1.1))),
+      tm(v.squash, 1, 250, 750),
+      tm(v.head, 1, 500, 800, Easing.inOut(Easing.quad)),
+      tm(v.tail, 1, 500, 850, Easing.inOut(Easing.quad)),
+      tm(v.dust, 1, 500, 780),
+      tm(v.mic, 1, 350, 1000),
+      tm(v.wl, 1, 400, 1050, Easing.out(Easing.back(1.3))),
+      tm(v.wr, 1, 400, 1100, Easing.out(Easing.back(1.3))),
+      tm(v.t981, 1, 350, 1300, Easing.out(Easing.back(1.4))),
+      tm(v.jam, 1, 400, 1500),
+    ]).start(() => {
+      // Keep the mic and waves breathing until the app is ready.
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(v.loop, { toValue: 1, duration: 600, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+          Animated.timing(v.loop, { toValue: 0, duration: 600, easing: Easing.inOut(Easing.sin), useNativeDriver: true }),
+        ]),
+      ).start();
+    });
+  }, [v]);
 
-  const onTap = () => {
-    if (holdTimerRef.current) {
-      clearTimeout(holdTimerRef.current)
-      setIntroDone(true)
-      return
-    }
-    introRef.current?.stop()
-    showAll()
-    hold(TAP_HOLD_MS)
-  }
+  useEffect(() => {
+    if (!ready) return;
+    // Let the sequence finish its core beats (~1.9s from mount) before leaving.
+    const id = setTimeout(() => {
+      Animated.timing(v.out, { toValue: 0, duration: 250, useNativeDriver: true }).start(() => onFinish());
+    }, 1900);
+    return () => clearTimeout(id);
+  }, [ready, onFinish, v]);
 
-  const pos = (key: keyof typeof LAYERS) => {
-    const r = LAYERS[key]
-    return {
-      position: 'absolute' as const,
-      left: (r.left - FACE_INSET) * s,
-      top: (r.top - FACE_INSET) * s,
-      width: r.width * s,
-      height: r.height * s,
-    }
-  }
+  // Rotate around a pivot given in logo coordinates.
+  const pivot = (val: Animated.Value, px: number, py: number, deg: number[], ins: number[]) => {
+    const cx = px * k - S / 2;
+    const cy = py * k - S / 2;
+    return [
+      { translateX: cx },
+      { translateY: cy },
+      { rotate: val.interpolate({ inputRange: ins, outputRange: deg.map((d) => `${d}deg`) }) },
+      { translateX: -cx },
+      { translateY: -cy },
+    ];
+  };
 
-  const strides = Array.from({ length: GALLOPS * 2 + 1 }, (_, i) => i / 2)
-  const bob = Animated.multiply(
-    v.gallop.interpolate({ inputRange: strides, outputRange: strides.map((_, i) => i % 2) }),
-    v.amp,
-  )
-  const popIn = (value: Animated.Value) => ({
-    opacity: value.interpolate({ inputRange: [0, 0.35], outputRange: [0, 1], extrapolate: 'clamp' }),
-    transform: [{ scale: value.interpolate({ inputRange: [0, 1], outputRange: [0.35, 1] }) }],
-  })
-  const bullBox = pos('bull')
+  const layer = (name: keyof typeof LAYERS, style: any = {}) => (
+    <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, style]}>
+      <SvgXml xml={LAYERS[name]} width={S} height={S} />
+    </Animated.View>
+  );
+
+  const C1 = 2 * Math.PI * 212;
+  const C2 = 2 * Math.PI * 200.5;
+  const loopGlow = v.loop.interpolate({ inputRange: [0, 1], outputRange: [1, 0.72] });
+  const waveLoop = v.loop.interpolate({ inputRange: [0, 1], outputRange: [1, 0.75] });
 
   return (
-    <Animated.View
-      style={[StyleSheet.absoluteFill, styles.root, { opacity: v.exit.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }) }]}
-      onLayout={() => void start()}
-      accessible
-      accessibilityLabel="JOWI 98.1 FM"
-    >
-      <Pressable style={StyleSheet.absoluteFill} onPress={onTap} accessibilityRole="button" accessibilityHint="Skip intro">
-        <LinearGradient
-          colors={['#3D1E07', colors.splashBg, '#170A02']}
-          locations={[0, 0.5, 1]}
-          style={StyleSheet.absoluteFill}
-        />
-        <View style={styles.center}>
-          {[1.95, 1.6, 1.28].map((k, i) => (
-            <Animated.View
-              key={k}
-              style={[
-                styles.halo,
-                {
-                  width: D * k,
-                  height: D * k,
-                  borderRadius: (D * k) / 2,
-                  opacity: Animated.multiply(
-                    v.halo,
-                    v.glow.interpolate({ inputRange: [0, 1], outputRange: [1, 1.8].map((m) => m * [0.05, 0.08, 0.12][i]) }),
-                  ),
-                  transform: [{ scale: v.glow.interpolate({ inputRange: [0, 1], outputRange: [1, 1.1] }) }],
-                },
-              ]}
-            />
-          ))}
+    <Animated.View style={[styles.root, { opacity: v.out }]} onLayout={onLayout}>
+      {/* pulse rings live in their own oversized layer so they are not clipped by the badge box */}
+      {PULSES.map((p, i) => (
+        <Animated.View
+          key={p.id}
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            width: S * PULSE_SCALE,
+            height: S * PULSE_SCALE,
+            opacity: pulse[i].interpolate({ inputRange: [0, 0.001, 1], outputRange: [0, 0.95, 0] }),
+            transform: [{ scale: pulse[i].interpolate({ inputRange: [0, 1], outputRange: [1 / PULSE_SCALE, 1] }) }],
+          }}>
+          <Svg width="100%" height="100%" viewBox={`${222 - (VIEWBOX / 2) * PULSE_SCALE} ${218 - (VIEWBOX / 2) * PULSE_SCALE} ${VIEWBOX * PULSE_SCALE} ${VIEWBOX * PULSE_SCALE}`}>
+            <Defs>
+              <LinearGradient id={p.id} x1={p.x1} y1={p.y1} x2={p.x2} y2={p.y2}>
+                <Stop offset="0" stopColor={p.from} />
+                <Stop offset="1" stopColor={p.to} />
+              </LinearGradient>
+            </Defs>
+            <Circle cx={222} cy={218} r={220 * PULSE_SCALE} fill="none" stroke={`url(#${p.id})`} strokeWidth={p.width * PULSE_SCALE} />
+          </Svg>
+        </Animated.View>
+      ))}
+      <View style={{ width: S, height: S }}>
+        {/* disc + rings */}
+        <Animated.View style={[StyleSheet.absoluteFill, { opacity: v.disc, transform: [{ scale: v.disc.interpolate({ inputRange: [0, 1], outputRange: [0.85, 1] }) }] }]}>
+          <Svg width={S} height={S} viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`}>
+            <Circle cx={221.8} cy={217.5} r={217.5} fill="#fff" />
+          </Svg>
+        </Animated.View>
+        <Svg width={S} height={S} viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`} style={StyleSheet.absoluteFill}>
+          <AnimatedCircle cx={222.4} cy={218} r={200.5} stroke={RED} strokeWidth={3} fill="none" strokeDasharray={C2} strokeDashoffset={v.ring.interpolate({ inputRange: [0, 1], outputRange: [C2, 0] })} rotation={-90} origin="222.4, 218" />
+          <AnimatedCircle cx={221.3} cy={217} r={212} stroke={BLUE} strokeWidth={11} fill="none" strokeDasharray={C1} strokeDashoffset={v.ring.interpolate({ inputRange: [0, 1], outputRange: [C1, 0] })} rotation={-90} origin="221.3, 217" />
+        </Svg>
 
-          <Animated.View
-            style={{
-              width: D,
-              height: D,
+        {/* buffalo: slides in as one piece, squashes on landing */}
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            {
+              opacity: v.slide.interpolate({ inputRange: [0, 0.05, 1], outputRange: [0, 1, 1] }),
               transform: [
-                { scale: Animated.multiply(v.disc, v.pulse) },
-                { scale: v.exit.interpolate({ inputRange: [0, 1], outputRange: [1, 1.12] }) },
+                { translateX: v.slide.interpolate({ inputRange: [0, 1], outputRange: [-210 * k, 0] }) },
+                { translateY: (285 - 223) * k },
+                { scaleX: v.squash.interpolate({ inputRange: [0, 0.4, 1], outputRange: [1, 1.03, 1] }) },
+                { scaleY: v.squash.interpolate({ inputRange: [0, 0.4, 1], outputRange: [1, 0.965, 1] }) },
+                { translateY: -(285 - 223) * k },
               ],
-            }}
-          >
-            <Animated.View
-              style={[
-                styles.ringPulse,
-                {
-                  width: D,
-                  height: D,
-                  borderRadius: D / 2,
-                  opacity: v.ring.interpolate({ inputRange: [0, 0.1, 1], outputRange: [0, 0.8, 0] }),
-                  transform: [{ scale: v.ring.interpolate({ inputRange: [0, 1], outputRange: [1, 1.22] }) }],
-                },
-              ]}
-            />
-            <Image source={IMAGES.disc} style={{ width: D, height: D }} fadeDuration={0} />
+            },
+          ]}>
+          {layer('ground')}
+          {layer('tail', { transform: pivot(v.tail, 350, 165, [0, 12, -8, 0], [0, 0.4, 0.75, 1]) })}
+          {layer('body')}
+          {layer('head', { transform: pivot(v.head, 150, 135, [0, 6, -7, 0], [0, 0.35, 0.7, 1]) })}
+          {layer('mic', { opacity: Animated.multiply(v.mic, loopGlow) })}
+        </Animated.View>
 
-            <View
-              style={{
-                position: 'absolute',
-                left: FACE_INSET * s,
-                top: FACE_INSET * s,
-                width: face,
-                height: face,
-                borderRadius: face / 2,
-                overflow: 'hidden',
-              }}
-            >
-              {[0.2, 0.5, 0.78].map((fx, i) => (
-                <Animated.View
-                  key={fx}
-                  style={[
-                    styles.dust,
-                    {
-                      left: bullBox.left + bullBox.width * fx - D * 0.045,
-                      top: bullBox.top + bullBox.height - D * 0.035,
-                      width: D * 0.09,
-                      height: D * 0.045,
-                      borderRadius: D * 0.045,
-                      opacity: v.dust.interpolate({ inputRange: [0, 0.15, 1], outputRange: [0, 0.35 - i * 0.06, 0] }),
-                      transform: [
-                        { translateX: v.dust.interpolate({ inputRange: [0, 1], outputRange: [0, -18 - i * 6] }) },
-                        { scale: v.dust.interpolate({ inputRange: [0, 1], outputRange: [0.4, 1.6] }) },
-                      ],
-                    },
-                  ]}
-                />
-              ))}
+        {/* waves ripple out from the mic, then breathe */}
+        {layer('wavesL', { opacity: v.wl, transform: [{ scaleY: Animated.multiply(v.wl.interpolate({ inputRange: [0, 1], outputRange: [0.15, 1] }), waveLoop) }] })}
+        {layer('wavesR', { opacity: v.wr, transform: [{ scaleY: Animated.multiply(v.wr.interpolate({ inputRange: [0, 1], outputRange: [0.15, 1] }), waveLoop) }] })}
 
-              <Animated.Image
-                source={IMAGES.bull}
-                fadeDuration={0}
-                style={[
-                  bullBox,
-                  {
-                    transform: [
-                      { translateX: v.bullX.interpolate({ inputRange: [-1, 0], outputRange: [-(bullBox.left + bullBox.width + 8), 0] }) },
-                      { translateY: bob.interpolate({ inputRange: [0, 1], outputRange: [0, -D * 0.07] }) },
-                      { rotate: bob.interpolate({ inputRange: [0, 1], outputRange: ['1deg', '-6deg'] }) },
-                      { translateY: bullBox.height / 2 },
-                      { scaleY: v.squash },
-                      { translateY: -bullBox.height / 2 },
-                    ],
-                  },
-                ]}
-              />
-
-              <Animated.Image
-                source={IMAGES.mic}
-                fadeDuration={0}
-                style={[
-                  pos('mic'),
-                  {
-                    opacity: v.mic.interpolate({ inputRange: [0, 0.3, 1], outputRange: [0, 1, 1] }),
-                    transform: [{ translateY: v.mic.interpolate({ inputRange: [0, 1], outputRange: [-D * 0.35, 0] }) }],
-                  },
-                ]}
-              />
-
-              <Animated.Image
-                source={IMAGES.wordmark}
-                fadeDuration={0}
-                style={[pos('wordmark'), popIn(v.word)]}
-              />
-
-              <Animated.Image source={IMAGES.tagline} fadeDuration={0} style={[pos('tagline'), popIn(v.tagline)]} />
-            </View>
-          </Animated.View>
-        </View>
-      </Pressable>
+        {layer('text981', { opacity: v.t981, transform: [{ scale: v.t981.interpolate({ inputRange: [0, 1], outputRange: [0.6, 1] }) }] })}
+        {layer('textJamuomo', { opacity: v.jam, transform: [{ translateY: v.jam.interpolate({ inputRange: [0, 1], outputRange: [8 * k, 0] }) }] })}
+      </View>
     </Animated.View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
-  root: { zIndex: 100, elevation: 100, backgroundColor: colors.splashBg },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  halo: { position: 'absolute', backgroundColor: colors.brandOrange },
-  ringPulse: { position: 'absolute', borderWidth: 3, borderColor: colors.brandOrange },
-  dust: { position: 'absolute', backgroundColor: colors.brandBrown },
-})
+  root: { ...StyleSheet.absoluteFill, backgroundColor: BULL_BROWN, alignItems: 'center', justifyContent: 'center' },
+});
