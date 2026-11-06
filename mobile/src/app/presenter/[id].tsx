@@ -2,8 +2,9 @@ import { Stack, useLocalSearchParams } from 'expo-router'
 import { Star } from 'lucide-react-native'
 import { View } from 'react-native'
 import { LiveBadge } from '../../components/LiveBadge'
+import { PresenterAvatar } from '../../components/PresenterAvatar'
 import { ShowRow } from '../../components/ShowRow'
-import { Button, Card, Initials, Screen, Txt } from '../../components/ui'
+import { Button, Card, Screen, Txt } from '../../components/ui'
 import { usePlayer } from '../../context/PlayerContext'
 import { usePreferences } from '../../context/PreferencesContext'
 import { useNowPlaying } from '../../hooks/useNowPlaying'
@@ -34,7 +35,7 @@ export default function PresenterScreen() {
     <Screen padTop={false}>
       <Stack.Screen options={{ title: presenter.name }} />
       <View style={{ alignItems: 'center', marginTop: space.md }}>
-        <Initials name={presenter.name} size={96} />
+        <PresenterAvatar id={presenter.id} name={presenter.name} size={96} />
         <Txt variant="display" style={{ marginTop: space.md, textAlign: 'center', fontSize: 28, lineHeight: 32 }}>
           {presenter.name}
         </Txt>

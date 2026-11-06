@@ -10,7 +10,7 @@ Booth desk is production-usable for news, Interact, and poll. Below is what is *
 - [ ] Confirm station **email** (`studio@jowi981.fm`) and office **location**
 - [x] Real **Facebook / TikTok** URLs
 - [ ] Real **YouTube / Instagram** URLs (icons hidden in the app until provided)
-- [ ] **Presenter photos** — and official **title + bio** still needed for Elfas Guya, Levinta Nyamigori, Linet Nyasiaya (10 official profiles received 2026-11-04). **Linda** (Jowi Tiyo mid-morning co-host) is **removed from both apps** until her official full name, title and bio arrive — re-add her in `src/config/schedule.ts` (presenter entry + `hostIds` on `weekday-jowi-tiyo`)
+- [ ] **Presenter photos** — apps are **pre-wired** (2026-11-06): drop `public/presenters/<presenter-id>.jpg` (square, ~800×800, e.g. `mercyline-akinyi-ogweno.jpg`) and the photo appears on web + mobile automatically — initials show until then. Mobile picks up new photos with no OTA (loads from the site URL); still needed: official **title + bio** for Elfas Guya, Levinta Nyamigori, Linet Nyasiaya (10 official profiles received 2026-11-04). **Linda** (Jowi Tiyo mid-morning co-host) is **removed from both apps** until her official full name, title and bio arrive — re-add her in `src/config/schedule.ts` (presenter entry + `hostIds` on `weekday-jowi-tiyo`)
 - [ ] Confirm **schedule** open notes in `SCHEDULE_NOTES` (Sunday gap, overnight slots, etc.)
 - [ ] Archive any leftover **demo bulletins** still in the Supabase `news_bulletins` table from early setup
 - [ ] Turn on real **listen banners** in `src/config/banners.ts` when advertisers book (`active: true`)

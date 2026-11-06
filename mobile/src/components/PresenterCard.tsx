@@ -4,7 +4,8 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import type { Presenter } from '@shared/schedule'
 import { usePreferences } from '../context/PreferencesContext'
 import { colors, fonts, radius } from '../theme'
-import { IconButton, Initials, Pill } from './ui'
+import { IconButton, Pill } from './ui'
+import { PresenterAvatar } from './PresenterAvatar'
 
 export function PresenterCard({ presenter, onAir }: { presenter: Presenter; onAir?: boolean }) {
   const { isFavoritePresenter, toggleFavoritePresenter } = usePreferences()
@@ -17,7 +18,7 @@ export function PresenterCard({ presenter, onAir }: { presenter: Presenter; onAi
       onPress={() => router.push({ pathname: '/presenter/[id]', params: { id: presenter.id } })}
       style={({ pressed }) => [styles.card, onAir && styles.onAir, pressed && { backgroundColor: colors.panel }]}
     >
-      <Initials name={presenter.name} />
+      <PresenterAvatar id={presenter.id} name={presenter.name} />
       <View style={{ flex: 1, minWidth: 0 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Text style={styles.name} numberOfLines={1}>

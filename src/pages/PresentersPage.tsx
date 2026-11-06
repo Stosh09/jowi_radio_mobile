@@ -1,5 +1,6 @@
 import { PRESENTERS } from '../config/station'
 import { useNowPlaying } from '../hooks/useNowPlaying'
+import { PresenterAvatar } from '../components/PresenterAvatar'
 
 export function PresentersPage() {
   const { current } = useNowPlaying()
@@ -39,16 +40,7 @@ export function PresentersPage() {
                   On air
                 </span>
               )}
-              <div
-                className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-jowi-gold/20 font-display text-2xl text-jowi-gold"
-                aria-hidden="true"
-              >
-                {p.name
-                  .split(' ')
-                  .map((w) => w[0])
-                  .join('')
-                  .slice(0, 2)}
-              </div>
+              <PresenterAvatar id={p.id} name={p.name} className="mb-5" />
               <p className="text-xs uppercase tracking-wider text-jowi-muted">
                 Host {String(index + 1).padStart(2, '0')}
               </p>
