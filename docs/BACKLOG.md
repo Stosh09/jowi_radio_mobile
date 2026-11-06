@@ -4,7 +4,8 @@ Booth desk is production-usable for news, Interact, and poll. Below is what is *
 
 ## Content (station / marketing)
 
-- [ ] Real **About** copy (more than the short blurb)
+- [x] Real **About** copy (story + MD/CEO leadership block written 2026-11-06; facts from public records need owner confirmation — founded 2019 as Ratego Radio)
+- [ ] **MD/CEO photo** for the About page — Mwalimu Odhiambo Makowiti (placeholder shown; drop into `public/leadership/` and set `leadership.photo` in `src/config/station.ts`)
 - [x] Real **studio phone + WhatsApp** (replaced placeholders in `src/config/station.ts`)
 - [ ] Confirm station **email** (`studio@jowi981.fm`) and office **location**
 - [x] Real **Facebook / TikTok** URLs

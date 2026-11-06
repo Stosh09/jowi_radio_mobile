@@ -1,3 +1,4 @@
+import { Camera } from 'lucide-react'
 import { WhatsappIcon } from '../components/SocialIcons'
 import { STATION } from '../config/station'
 
@@ -16,6 +17,12 @@ export function AboutPage() {
         {STATION.about.blurb}
       </p>
 
+      <div className="mt-6 max-w-3xl space-y-4 leading-relaxed text-jowi-muted">
+        {STATION.about.story.map((para) => (
+          <p key={para}>{para}</p>
+        ))}
+      </div>
+
       <dl className="mt-10 grid gap-6 sm:grid-cols-3">
         <div className="border-t border-jowi-gold pt-4">
           <dt className="text-xs uppercase tracking-wider text-jowi-muted">Frequency</dt>
@@ -30,6 +37,37 @@ export function AboutPage() {
           <dd className="mt-1 font-display text-2xl text-white">{STATION.about.founded}</dd>
         </div>
       </dl>
+
+      <section className="mt-14 max-w-3xl">
+        <h2 className="font-display text-2xl uppercase text-white">Leadership</h2>
+        <div className="mt-6 flex flex-col gap-6 sm:flex-row sm:items-center">
+          <div className="flex h-44 w-44 shrink-0 flex-col items-center justify-center gap-3 overflow-hidden border border-dashed border-jowi-gold/50 bg-jowi-card/60 text-center text-jowi-muted">
+            {STATION.leadership.photo ? (
+              <img
+                src={STATION.leadership.photo}
+                alt={STATION.leadership.name}
+                className="h-full w-full object-cover"
+              />
+            ) : (
+              <>
+                <Camera size={30} aria-hidden="true" />
+                <span className="px-2 text-[10px] font-semibold uppercase tracking-widest">
+                  Photo coming soon
+                </span>
+              </>
+            )}
+          </div>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-jowi-gold">
+              {STATION.leadership.role}
+            </p>
+            <h3 className="mt-2 font-display text-2xl uppercase text-white">
+              {STATION.leadership.name}
+            </h3>
+            <p className="mt-3 leading-relaxed text-jowi-muted">{STATION.leadership.bio}</p>
+          </div>
+        </div>
+      </section>
 
       <section className="mt-14 max-w-xl">
         <h2 className="font-display text-2xl uppercase text-white">Contact the studio</h2>

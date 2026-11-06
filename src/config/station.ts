@@ -9,12 +9,23 @@ export const STATION = {
   listeners: 247,
   about: {
     blurb:
-      'JOWI 98.1 FM is the voice of the community — music, talk, news, and culture that keeps jamuomo connected.',
-    location: 'Kenya',
-    founded: '2018',
+      'JOWI 98.1 FM is a Dholuo community radio station broadcasting from Kisumu — music, talk, news, and culture that keeps jamuomo connected.',
+    location: 'Kisumu, Kenya',
+    founded: '2019',
+    story: [
+      "JOWI means buffalo — in Luo lore the symbol of strength, courage and endurance — and jamuomo is the greeting that carries it across the airwaves. Broadcasting in Dholuo from Kisumu, JOWI 98.1 FM reaches listeners across Nyanza: Kisumu, Homa Bay, Siaya, Migori, Kisii and Nyamira.",
+      "The station began in April 2019 in Siaya as Ratego Radio, and in November 2022 it was reborn as Jowi FM — moving to Kisumu and growing its signal across the region. The lineup runs from dawn to dawn: Wuok Chieng' at first light, mid-morning talk on Jowi Tiyo, Kamata Pozi, Jamuomo Drive, Tipo Mbaka after dark, and the overnight Jowi Express — with rhumba, benga, reggae, afrobeats and gospel in between.",
+      'Community first: news you can trust, health and governance conversations that matter, and edutainment in the language of home. The conversation runs both ways, too — shout out, request a song, vote in the polls, or just listen live from the app.',
+    ],
     email: 'studio@jowi981.fm',
     phone: '+254 750 499 077',
     whatsapp: '254141396517',
+  },
+  leadership: {
+    name: 'Mwalimu Odhiambo Makowiti',
+    role: 'Managing Director / CEO',
+    bio: "Guides JOWI 98.1 FM as Managing Director and CEO — setting the station's vision and keeping it rooted in the community. Listeners know his voice too: he hosts Tipo Mbaka weeknights, 8pm to midnight.",
+    photo: null as string | null, // e.g. '/leadership/makowiti.png' when the photo arrives
   },
   social: {
     facebook: 'https://www.facebook.com/share/1A8AeywT59/',
