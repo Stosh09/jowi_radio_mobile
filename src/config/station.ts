@@ -25,7 +25,7 @@ export const STATION = {
     name: 'Mwalimu Odhiambo Makowiti',
     role: 'Managing Director / CEO',
     bio: "Guides JOWI 98.1 FM as Managing Director and CEO — setting the station's vision and keeping it rooted in the community. Listeners know his voice too: he hosts Tipo Mbaka weeknights, 8pm to midnight.",
-    photo: null as string | null, // e.g. '/leadership/makowiti.png' when the photo arrives
+    photo: '/presenters/mwalimu-odhiambo-mcowiti.jpg' as string | null, // same photo as his presenter card
   },
   social: {
     facebook: 'https://www.facebook.com/share/1A8AeywT59/',

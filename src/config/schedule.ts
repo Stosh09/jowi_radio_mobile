@@ -239,6 +239,11 @@ export const SCHEDULE: ScheduleBlock[] = [
   },
 ]
 
+/**
+ * Order matters: presenters WITH photos come first (Host01…); those still
+ * waiting for a photo sit at the bottom and renumber when photos arrive.
+ * Photo convention: `public/presenters/<id>.jpg`.
+ */
 export const PRESENTERS: Presenter[] = [
   {
     id: 'duncan-mcandiwo',
@@ -246,13 +251,6 @@ export const PRESENTERS: Presenter[] = [
     role: 'Journalist / Programme Producer',
     show: "Wuok Chieng' · Hema Mar Geno",
     bio: 'Over a decade experience. Creator of Hema Mar Geno (Tent of Hope). Expert in radio adverts, jingles, promos and sweepers.',
-  },
-  {
-    id: 'jared-ojwang',
-    name: 'Jared Ojwang',
-    role: 'Journalist / Presenter',
-    show: "Wuok Chieng' · Abila",
-    bio: 'Seasoned journalist of wit and authority. Bold, assertive and fearless in tackling hard topics on social and political impact, justice and accountability. Known for provocative humor in news and continuity, and a champion for the downtrodden and voiceless.',
   },
   {
     id: 'mercyline-akinyi-ogweno',
@@ -318,17 +316,24 @@ export const PRESENTERS: Presenter[] = [
     bio: 'Hosts the weekend overnight Jowi Express and Jowi Sunday Express.',
   },
   {
-    id: 'linet-nyasiaya',
-    name: 'Linet Nyasiaya',
-    role: 'Sunday afternoon host',
-    show: 'I and I Reggae Show',
-    bio: "Presents the I and I Reggae Show on Sunday afternoons.",
-  },
-  {
     id: 'felix-leja',
     name: 'Felix Leja',
     role: 'Journalist / News Anchor',
     show: 'Jowi Benga',
     bio: 'Passionate and dedicated journalist with a strong interest in news anchoring, current affairs, community stories, and human-interest journalism. Committed to delivering accurate, balanced, and credible information while giving a voice to communities.',
+  },
+  {
+    id: 'jared-ojwang',
+    name: 'Jared Ojwang',
+    role: 'Journalist / Presenter',
+    show: "Wuok Chieng' · Abila",
+    bio: 'Seasoned journalist of wit and authority. Bold, assertive and fearless in tackling hard topics on social and political impact, justice and accountability. Known for provocative humor in news and continuity, and a champion for the downtrodden and voiceless.',
+  },
+  {
+    id: 'linet-nyasiaya',
+    name: 'Linet Nyasiaya',
+    role: 'Sunday afternoon host',
+    show: 'I and I Reggae Show',
+    bio: "Presents the I and I Reggae Show on Sunday afternoons.",
   },
 ]
