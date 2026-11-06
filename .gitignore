@@ -20,6 +20,11 @@ dist-ssr
 # Supabase CLI local state
 supabase/.temp/
 
+# Source asset drops (already copied into mobile/assets/jowi and public)
+jowi-assets/
+jowi-assets-v2/
+jowi-assets*.zip
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
